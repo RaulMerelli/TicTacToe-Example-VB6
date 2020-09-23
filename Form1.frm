@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin VB.Form Tris 
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "Form1"
+   Caption         =   "Tris"
    ClientHeight    =   3450
    ClientLeft      =   150
    ClientTop       =   795
@@ -15,6 +15,7 @@ Begin VB.Form Tris
       Italic          =   0   'False
       Strikethrough   =   0   'False
    EndProperty
+   Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    ScaleHeight     =   3450
@@ -36,7 +37,7 @@ Begin VB.Form Tris
       ForeColor       =   &H80000008&
       Height          =   3450
       Left            =   0
-      Picture         =   "Form1.frx":0000
+      Picture         =   "Form1.frx":3AFA
       ScaleHeight     =   3450
       ScaleMode       =   0  'User
       ScaleWidth      =   3454.936
@@ -88,7 +89,9 @@ Private Sub Picture1_MouseUp(Button As Integer, Shift As Integer, x As Single, y
             Mark x2, y2 'segna
             Vincitore = CheckWin 'controlla vincitore
             If Not Vincitore = "" Then 'controlla se c'è un esito
-                MsgBox (Vincitore&"\nNuova partita?")
+                If vbYes = MsgBox(Vincitore & vbCrLf & "Nuova partita?", vbYesNo, "Partita finita!") Then
+                    Reset
+                End If
             End If
         End If
     End If
@@ -96,7 +99,15 @@ End Sub
 
 Private Function CheckWin() As String
     Dim result As Integer: result = 0
-    Dim tie As Boolean: tie = True
+    'controllo pareggio
+    For y_loc = 0 To 2
+        For x_loc = 0 To 2
+            If Matrice(x_loc, y_loc) = 0 Then
+                result = -1
+                Exit For
+            End If
+        Next
+    Next
     'controllo tris orizzontale e verticale
     For i = 0 To 2
         If Matrice(0, i) = Matrice(1, i) And Matrice(1, i) = Matrice(2, i) And Not Matrice(0, i) = 0 Then
@@ -106,19 +117,10 @@ Private Function CheckWin() As String
         End If
     Next
     'controllo tris diagonale
-    If (Matrice(0, 0) = Matrice(1, 1) And Matrice(1, 1) = Matrice(2, 2) And Not Matrice(1, 1) = 0) Or (Matrice(0, 2) = Matrice(1, 1) And Matrice(2, 0) = Matrice(0, 2) And Not Matrice(1, 1) = 0) Then
+    If Not Matrice(1, 1) = 0 And ((Matrice(0, 0) = Matrice(1, 1) And Matrice(1, 1) = Matrice(2, 2)) Or (Matrice(0, 2) = Matrice(1, 1) And Matrice(2, 0) = Matrice(0, 2))) Then
         result = Matrice(1, 1)
     End If
-    'controllo pareggio
-    For y_loc = 0 To 2
-        For x_loc = 0 To 2
-            If Matrice(x_loc, y_loc) = 0 Then
-                tie = False
-                Exit For
-            End If
-        Next
-    Next
-    CheckWin = IIf(result = 1, "Il vincitore è il giocatore 1 (O)!", IIf(result = 2, "Il vincitore è il giocatore 2 (X)!", IIf(tie, "Pareggio!", "")))
+    CheckWin = IIf(result = 1, "Il vincitore è il giocatore 1 (O)!", IIf(result = 2, "Il vincitore è il giocatore 2 (X)!", IIf(result = -1, "", "Pareggio!")))
 End Function
 
 Private Sub Mark(x As Integer, y As Integer)
@@ -139,7 +141,7 @@ End Sub
 Private Sub Reset()
     Vincitore = ""
     Turno = 1
-     For y_loc = 0 To 2
+    For y_loc = 0 To 2
         For x_loc = 0 To 2
             Matrice(x_loc, y_loc) = 0
             For Each ctl In Controls
